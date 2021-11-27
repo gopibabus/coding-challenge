@@ -5,6 +5,8 @@ namespace App\Entity;
 
 use App\Repository\NoteRepository;
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -43,10 +45,16 @@ class Note
      */
     protected $updatedAt;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Tag::class, cascade={"persist"}, inversedBy="notes")
+     */
+    private $tags;
+
     public function __construct()
     {
         $this->createdAt = new DateTime();
         $this->updatedAt = new DateTime();
+        $this->tags = new ArrayCollection();
     }
 
     /**
@@ -127,5 +135,61 @@ class Note
     public function setUpdatedAt(DateTime $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * @return Collection|Tag[]
+     */
+    public function getTags(): Collection
+    {
+        return $this->tags;
+    }
+
+    /**
+     * @return array
+     */
+    public function getTagNames(): array
+    {
+        $tags = [];
+        foreach ($this->tags as $tag) {
+            $tags[] = $tag->getName();
+        }
+
+        return $tags;
+    }
+
+    /**
+     * @param  Tag  $tag
+     * @return $this
+     */
+    public function addTag(Tag $tag): self
+    {
+        if (!$this->tags->contains($tag)) {
+            $this->tags[] = $tag;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param  Tag  $tag
+     * @return $this
+     */
+    public function removeTag(Tag $tag): self
+    {
+        $this->tags->removeElement($tag);
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function removeAllTags(): self
+    {
+        foreach ($this->tags as $tag) {
+            $this->tags->removeElement($tag);
+        }
+
+        return $this;
     }
 }

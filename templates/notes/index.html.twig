@@ -1,28 +1,30 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Article Homepage{% endblock %}
+{% block title %}Note Homepage{% endblock %}
 
 {% block body %}
-    {% if articles %}
-        <table id="articles" class="table table-stripped">
-            <thead>
-            <tr>
-                <th>Article Title</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for article in articles %}
-                <tr>
-                    <td>{{ article.title }}</td>
-                    <td><a href="/article/{{ article.id }}" class="btn btn-dark">Show</a></td>
-                    <td><a href="/article/edit/{{ article.id }}" class="btn btn-light">Edit</a></td>
-                    <td><a href="#" class="btn btn-danger delete-article" data-id="{{ article.id }}">Delete</a></td>
-                </tr>
+    {% if notes %}
+        <div id="notes">
+            {% for note in notes %}
+                <div class="note">
+                    <h3>{{ note.title }}</h3>
+                    <p>{{ note.body | raw }}</p>
+                    <p>
+                        {% for tag in note.tags %}
+                            <span class="badge rounded-pill bg-primary">{{ tag.name }}</span>
+                        {% endfor %}
+                    </p>
+
+                    <a href="/note/{{ note.id }}" class="btn btn-dark m-2">Show</a>
+                    <a href="/note/edit/{{ note.id }}" class="btn btn-success m-2">Edit</a>
+                    <a href="#" class="btn btn-danger delete-note m-2" data-id="{{ note.id }}">Delete</a>
+                    <hr class="m-3">
+                </div>
             {% endfor %}
-            </tbody>
-        </table>
+        </div>
+
     {% else %}
+        <p>No notes found👎. Please create a note 🙂.</p>
     {% endif %}
     <script src="./assets/js/main.js"> </script>
 {% endblock %}

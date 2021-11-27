@@ -1,4 +1,25 @@
 # Coding Challenge
 
-### How to run this project?
+### How to Set up and run the Application
+```bash
+# Copy Config
+# Feel free to update values in .env file as needed
+cp ./.env ./.env.local
 
+DATABASE_URL="mysql://root:root@127.0.0.1:3306/note_taking_app"
+
+# Install php dependencies
+composer update
+
+# Spin docker container for creating database
+docker-compose up
+
+# Create Database
+php bin/console doctrine:database:create
+
+# Migrate data to database
+php bin/console doctrine:migrations:migrate
+
+# Serve Application
+symfony serve
+```

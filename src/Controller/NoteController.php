@@ -4,10 +4,8 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Note;
+use App\Entity\Tag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -26,26 +24,31 @@ class NoteController extends AbstractController
     /**
      * @Route ("/note/new", methods={"GET", "POST"},  name="note_new")
      */
-    public function new(Request $request)
+    public function new(Request $request): Response
     {
+        return $this->render('notes/new.html.twig', ['tags' => ['personal', 'family', 'job', 'work']]);
+    }
+
+    /**
+     * @Route ("/note/create", methods={"POST"},  name="note_create")
+     */
+    public function createNote(Request $request): Response
+    {
+        $entityManager = $this->getDoctrine()->getManager();
         $note = new Note();
-        $form = $this->createFormBuilder($note)
-            ->add('title', TextType::class, ['attr' => ['class' => 'form-control']])
-            ->add('body', TextareaType::class, ['attr' => ['required' => false, 'class' => 'form-control']])
-            ->add('save', SubmitType::class, ['label' => 'Create', 'attr' => ['class' => 'btn btn-primary mt-3']])
-            ->getForm();
+        $note->setTitle($request->request->get('note-input'));
+        $note->setBody($request->request->get('note-body'));
 
-        $form->handleRequest($request);
-        if($form->isSubmitted() && $form->isValid()){
-            $note = $form->getData();
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($note);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('note_list');
+        $noteTags = $request->request->get('note-tag');
+        foreach ($noteTags as $tag) {
+            $noteTag = new Tag();
+            $noteTag->setName($tag);
+            $note->addTag($noteTag);
         }
+        $entityManager->persist($note);
+        $entityManager->flush();
 
-        return $this->render('notes/new.html.twig', ['form' => $form->createView()]);
+        return $this->redirectToRoute('note_list');
     }
 
     /**
@@ -54,21 +57,6 @@ class NoteController extends AbstractController
     public function show(Note $note): Response
     {
         return $this->render('notes/show.html.twig', ['note' => $note]);
-    }
-
-    /**
-     * @Route ("/note/save", methods={"GET"}, name="note_save")
-     */
-    public function save(): Response
-    {
-        $entityManager = $this->getDoctrine()->getManager();
-        $note = new Note();
-        $note->setTitle('Note one');
-        $note->setBody('Body of note 1');
-        $entityManager->persist($note);
-        $entityManager->flush();
-
-        return new Response('saved note with id of'. $note->getId());
     }
 
     /**
@@ -86,23 +74,40 @@ class NoteController extends AbstractController
     /**
      * @Route ("/note/edit/{id}", methods={"GET", "POST"},  name="note_edit")
      */
-    public function edit(Request $request, $id)
+    public function edit(Request $request, $id): Response
     {
+        /**
+         * @var Note
+         */
         $note = $this->getDoctrine()->getRepository(Note::class)->find($id);
-        $form = $this->createFormBuilder($note)
-            ->add('title', TextType::class, ['attr' => ['class' => 'form-control']])
-            ->add('body', TextareaType::class, ['attr' => ['required' => false, 'class' => 'form-control']])
-            ->add('save', SubmitType::class, ['label' => 'Update', 'attr' => ['class' => 'btn btn-primary mt-3']])
-            ->getForm();
 
-        $form->handleRequest($request);
-        if($form->isSubmitted() && $form->isValid()){
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->flush();
+        return $this->render('notes/edit.html.twig', [
+            'note' => $note,
+            'tags' => ['personal', 'family', 'job', 'work'],
+            'selectedTags' => $note->getTagNames()
+        ]);
+    }
 
-            return $this->redirectToRoute('note_list');
+    /**
+     * @Route ("/note/save", methods={"POST"},  name="note_save")
+     */
+    public function saveNote(Request $request): Response
+    {
+        $note = $this->getDoctrine()->getRepository(Note::class)->find($request->request->get('note-id'));
+        $entityManager = $this->getDoctrine()->getManager();
+        $note->setTitle($request->request->get('note-input'));
+        $note->setBody($request->request->get('note-body'));
+
+        $note->removeAllTags();
+        $noteTags = $request->request->get('note-tag');
+        foreach ($noteTags as $tag) {
+            $noteTag = new Tag();
+            $noteTag->setName($tag);
+            $note->addTag($noteTag);
         }
+        $entityManager->persist($note);
+        $entityManager->flush();
 
-        return $this->render('notes/edit.html.twig', ['form' => $form->createView()]);
+        return $this->redirectToRoute('note_show', ['id' => $note->getId()]);
     }
 }

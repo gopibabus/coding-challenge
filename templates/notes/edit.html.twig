@@ -1,10 +1,30 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Article{% endblock %}
+{% block title %}Edit Note{% endblock %}
 
 {% block body %}
-    {{ form_start(form) }}
-    {{ form_widget(form) }}
-    {{ form_end(form) }}
+    <form method="post" action="/note/save">
+        <div class="form-group">
+            <input type="hidden" name="note-id" value="{{ note.id }}">
+        </div>
+        <div class="form-group">
+            <label for="note-input">Title:</label>
+            <input type="text" class="form-control" id="note-input" placeholder="Enter note title" name="note-input" value="{{ note.title }}">
+        </div>
+        <div class="form-group my-2">
+            <label for="note-body">Body:</label>
+            <textarea class="form-control" id="note-body" rows="10" name="note-body">{{ note.body | striptags }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="note-tag">Tags:</label>
+            <select class="custom-select form-control my-2" id="note-tag" name="note-tag[]" multiple>
+                <option>Select Tag</option>
+                {% for tag in tags %}
+                    <option value="{{ tag }}" {% if tag in selectedTags %} selected {% endif %}>{{ tag }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary my-2">Submit</button>
+    </form>
 {% endblock %}
 

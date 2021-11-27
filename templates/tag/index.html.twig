@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tag Homepage{% endblock %}
+
+{% block body %}
+    {% if tags %}
+        <ul class="list-group" id="tags">
+            {% for tag in tags %}
+                <li class="list-group-item d-flex justify-content-between">{{ tag }} <a href="#" class="btn btn-danger delete-tag m-2" data-id="">Delete</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No tags found👎. Please create a note and tag it 🙂.</p>
+    {% endif %}
+    <script src="./assets/js/main.js"> </script>
+{% endblock %}

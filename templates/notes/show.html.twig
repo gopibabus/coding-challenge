@@ -1,11 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Article {{ article.id }}{% endblock %}
+{% block title %}Note: {{ note.id }}{% endblock %}
 
 {% block body %}
-    <h1>{{ article.title }}</h1>
-    <p>{{ article.body }}</p>
-    <hr>
+    <div class="note">
+        <h3>{{ note.title }}</h3>
+        <p>{{ note.body | raw }}</p>
+        <p>
+            {% for tag in note.tags %}
+                <span class="badge rounded-pill bg-primary">{{ tag.name }}</span>
+            {% endfor %}
+        </p>
+        <hr class="m-3">
+    </div>
     <a href="/">Go Back</a>
 {% endblock %}
 
