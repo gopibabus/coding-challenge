@@ -23,3 +23,15 @@ php bin/console doctrine:migrations:migrate
 # Serve Application
 symfony serve
 ```
+
+### Screenshots
+
+![notes](img.png)
+
+---
+
+![new note](img_2.png)
+
+---
+
+![tags](img_1.png)
